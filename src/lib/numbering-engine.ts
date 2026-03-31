@@ -54,12 +54,13 @@ export function renderAffiliationText(
   if (config.includeDepartment && c.department) parts.push(c.department);
   if (config.includeFaculty && c.faculty) parts.push(c.faculty);
   parts.push(c.university);
-  parts.push(c.city);
-  
-  // Apply hkSuffix for country
+
+  // Hong Kong: do not emit city then hkSuffix — that duplicates "Hong Kong" (e.g. "…, Hong Kong, Hong Kong SAR, China").
+  // The configured hkSuffix is the full location tail ("Hong Kong", "Hong Kong, China", or "Hong Kong SAR, China").
   if (c.city === 'Hong Kong') {
     parts.push(config.hkSuffix);
   } else {
+    parts.push(c.city);
     parts.push(c.country);
   }
 
@@ -72,32 +73,80 @@ export function renderAffiliationText(
 }
 
 /**
- * Core numbering algorithm: compute numbered output from authors and institutions
+ * Build ordered list of referenced institution IDs.
+ * When globalInstitutionOrder is provided, referenced IDs follow that order first; any stragglers follow author walk order.
  */
-export function computeNumbering(
+function resolveReferencedInstitutionOrder(
   authors: Author[],
-  institutions: Map<string, Institution>,
-  config: TemplateConfig
-): NumberedOutput {
-  if (authors.length === 0) {
-    return { authors: [], affiliations: [], footnotes: [] };
+  globalInstitutionOrder: string[] | undefined
+): string[] {
+  const referenced = new Set<string>();
+  for (const author of authors) {
+    for (const id of author.affiliationIds) {
+      referenced.add(id);
+    }
   }
 
-  // Step 1: Collect unique institution IDs in order of first appearance
-  const institutionOrder: string[] = [];
-  const institutionToNumber = new Map<string, string>();
+  const orderedIds: string[] = [];
+  const seen = new Set<string>();
 
-  for (const author of authors) {
-    for (const instId of author.affiliationIds) {
-      if (!institutionToNumber.has(instId)) {
-        const superscript = getNextSuperscript(institutionOrder.length, config.superscriptStyle);
-        institutionToNumber.set(instId, superscript);
-        institutionOrder.push(instId);
+  if (globalInstitutionOrder?.length) {
+    for (const id of globalInstitutionOrder) {
+      if (referenced.has(id) && !seen.has(id)) {
+        orderedIds.push(id);
+        seen.add(id);
       }
     }
   }
 
-  // Step 2: Build numbered authors
+  for (const author of authors) {
+    for (const id of author.affiliationIds) {
+      if (referenced.has(id) && !seen.has(id)) {
+        orderedIds.push(id);
+        seen.add(id);
+      }
+    }
+  }
+
+  return orderedIds;
+}
+
+/**
+ * Core numbering algorithm: compute numbered output from authors and institutions.
+ * When globalInstitutionOrder is set (affiliation pool order), numbering follows it for referenced affiliations only.
+ * When no authors but globalInstitutionOrder has entries, returns numbered affiliation list only (preview / pool).
+ */
+export function computeNumbering(
+  authors: Author[],
+  institutions: Map<string, Institution>,
+  config: TemplateConfig,
+  globalInstitutionOrder?: string[]
+): NumberedOutput {
+  if (authors.length === 0) {
+    if (!globalInstitutionOrder?.length) {
+      return { authors: [], affiliations: [], footnotes: [] };
+    }
+    const numberedAffiliations: NumberedAffiliation[] = [];
+    globalInstitutionOrder.forEach((instId, idx) => {
+      const institution = institutions.get(instId);
+      if (!institution) return;
+      const number = getNextSuperscript(idx, config.superscriptStyle);
+      numberedAffiliations.push({
+        number,
+        institution,
+        displayText: renderAffiliationText(institution, config),
+      });
+    });
+    return { authors: [], affiliations: numberedAffiliations, footnotes: [] };
+  }
+
+  const institutionOrder = resolveReferencedInstitutionOrder(authors, globalInstitutionOrder);
+  const institutionToNumber = new Map<string, string>();
+
+  institutionOrder.forEach((instId, i) => {
+    institutionToNumber.set(instId, getNextSuperscript(i, config.superscriptStyle));
+  });
+
   const numberedAuthors: NumberedAuthor[] = authors.map(author => {
     const superscripts = author.affiliationIds
       .map(id => institutionToNumber.get(id))
@@ -114,7 +163,6 @@ export function computeNumbering(
     return { author, superscripts, symbols };
   });
 
-  // Step 3: Build numbered affiliations
   const numberedAffiliations: NumberedAffiliation[] = institutionOrder.map(instId => {
     const institution = institutions.get(instId);
     if (!institution) {
@@ -125,10 +173,8 @@ export function computeNumbering(
     return { number, institution, displayText };
   });
 
-  // Step 4: Build footnotes
   const footnotes: Footnote[] = [];
-  
-  // Co-first author footnote (only if at least one co-first author exists)
+
   const hasCoFirst = authors.some(a => a.isCoFirst);
   if (hasCoFirst) {
     footnotes.push({
@@ -137,7 +183,6 @@ export function computeNumbering(
     });
   }
 
-  // Corresponding author footnotes
   const correspondingAuthors = authors.filter(a => a.isCorresponding);
   for (const author of correspondingAuthors) {
     footnotes.push({

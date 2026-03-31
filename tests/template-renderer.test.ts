@@ -84,8 +84,8 @@ function createTestOutput(): NumberedOutput {
   ];
 
   const numberedAffiliations: NumberedAffiliation[] = [
-    { number: '1', institution: inst1, displayText: 'Department of Medicine, Faculty of Medicine, The University of Hong Kong, Hong Kong, Hong Kong SAR, China' },
-    { number: '2', institution: inst2, displayText: 'State Key Laboratory, The University of Hong Kong, Hong Kong, Hong Kong SAR, China' },
+    { number: '1', institution: inst1, displayText: 'Department of Medicine, Faculty of Medicine, The University of Hong Kong, Hong Kong SAR, China' },
+    { number: '2', institution: inst2, displayText: 'State Key Laboratory, The University of Hong Kong, Hong Kong SAR, China' },
     { number: '3', institution: inst3, displayText: 'Department of Computer Science, Tsinghua University, Beijing, China' },
   ];
 

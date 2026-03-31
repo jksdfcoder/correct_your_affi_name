@@ -237,5 +237,18 @@ describe('Numbering Engine', () => {
       expect(text1).not.toContain('SAR');
       expect(text2).toContain('Hong Kong SAR, China');
     });
+
+    it('Hong Kong city does not duplicate before hkSuffix', () => {
+      const inst = createInstitution('inst1', {
+        department: 'State Key Laboratory of Liver Research',
+        faculty: 'Li Ka Shing Faculty of Medicine',
+      });
+      const text = renderAffiliationText(inst, defaultConfig);
+      expect(text).toBe(
+        'State Key Laboratory of Liver Research, Li Ka Shing Faculty of Medicine, The University of Hong Kong, Hong Kong SAR, China'
+      );
+      // Regression: avoid city + hkSuffix becoming ", Hong Kong, Hong Kong SAR, China"
+      expect(text).not.toContain(', Hong Kong, Hong Kong,');
+    });
   });
 });
