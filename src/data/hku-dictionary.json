@@ -1,0 +1,152 @@
+{
+  "version": "1.0.0",
+  "university": {
+    "name": "The University of Hong Kong",
+    "short_name": "HKU",
+    "city": "Hong Kong",
+    "country": "China",
+    "ror_id": "https://ror.org/02zhqgq86"
+  },
+  "units": [
+    {
+      "id": "fac-medicine",
+      "type": "faculty",
+      "name": "Li Ka Shing Faculty of Medicine",
+      "aliases": ["HKU Medicine", "Medicine"],
+      "parent_id": null
+    },
+    {
+      "id": "fac-engineering",
+      "type": "faculty",
+      "name": "Faculty of Engineering",
+      "aliases": ["HKU Engineering"],
+      "parent_id": null
+    },
+    {
+      "id": "fac-science",
+      "type": "faculty",
+      "name": "Faculty of Science",
+      "aliases": ["HKU Science"],
+      "parent_id": null
+    },
+    {
+      "id": "dept-medicine",
+      "type": "department",
+      "name": "Department of Medicine",
+      "aliases": ["Medicine Department"],
+      "parent_id": "fac-medicine"
+    },
+    {
+      "id": "dept-surgery",
+      "type": "department",
+      "name": "Department of Surgery",
+      "aliases": ["Surgery Department"],
+      "parent_id": "fac-medicine"
+    },
+    {
+      "id": "dept-computer-science",
+      "type": "department",
+      "name": "Department of Computer Science",
+      "aliases": ["CS Department", "HKU CS"],
+      "parent_id": "fac-engineering"
+    },
+    {
+      "id": "dept-electrical-electronic-engineering",
+      "type": "department",
+      "name": "Department of Electrical and Electronic Engineering",
+      "aliases": ["EEE Department", "HKU EEE"],
+      "parent_id": "fac-engineering"
+    },
+    {
+      "id": "dept-chemistry",
+      "type": "department",
+      "name": "Department of Chemistry",
+      "aliases": ["Chemistry Department"],
+      "parent_id": "fac-science"
+    },
+    {
+      "id": "dept-physics",
+      "type": "department",
+      "name": "Department of Physics",
+      "aliases": ["Physics Department"],
+      "parent_id": "fac-science"
+    },
+    {
+      "id": "div-cardiology",
+      "type": "division",
+      "name": "Division of Cardiology",
+      "aliases": ["Cardiology"],
+      "parent_id": "dept-medicine"
+    },
+    {
+      "id": "div-neurology",
+      "type": "division",
+      "name": "Division of Neurology",
+      "aliases": ["Neurology"],
+      "parent_id": "dept-medicine"
+    },
+    {
+      "id": "lab-brain-cognitive-sciences",
+      "type": "lab",
+      "name": "State Key Laboratory of Brain and Cognitive Sciences",
+      "aliases": ["SKLBCS"],
+      "parent_id": "fac-medicine"
+    },
+    {
+      "id": "lab-liver-research",
+      "type": "lab",
+      "name": "State Key Laboratory of Liver Research",
+      "aliases": ["SKLLR"],
+      "parent_id": "fac-medicine"
+    },
+    {
+      "id": "hospital-queen-mary",
+      "type": "hospital",
+      "name": "Queen Mary Hospital",
+      "aliases": ["QMH", "Queen Mary"],
+      "parent_id": null
+    },
+    {
+      "id": "hospital-tung-wah",
+      "type": "hospital",
+      "name": "Tung Wah Hospital",
+      "aliases": ["TWH"],
+      "parent_id": null
+    },
+    {
+      "id": "centre-genomic-sciences",
+      "type": "centre",
+      "name": "Centre for Genomic Sciences",
+      "aliases": ["CGS"],
+      "parent_id": "fac-medicine"
+    },
+    {
+      "id": "institute-hku-pasteur",
+      "type": "institute",
+      "name": "HKU-Pasteur Research Pole",
+      "aliases": ["HKU-Pasteur"],
+      "parent_id": "fac-medicine"
+    },
+    {
+      "id": "school-public-health",
+      "type": "school",
+      "name": "School of Public Health",
+      "aliases": ["HKU Public Health"],
+      "parent_id": "fac-medicine"
+    },
+    {
+      "id": "school-nursing",
+      "type": "school",
+      "name": "School of Nursing",
+      "aliases": ["HKU Nursing"],
+      "parent_id": "fac-medicine"
+    },
+    {
+      "id": "programme-mbbs",
+      "type": "programme",
+      "name": "MBBS Programme",
+      "aliases": ["Bachelor of Medicine and Bachelor of Surgery"],
+      "parent_id": "fac-medicine"
+    }
+  ]
+}

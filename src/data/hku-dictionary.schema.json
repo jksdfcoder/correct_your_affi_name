@@ -1,0 +1,57 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.org/schemas/hku-dictionary.schema.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["version", "university", "units"],
+  "properties": {
+    "version": {
+      "type": "string",
+      "const": "1.0.0"
+    },
+    "university": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "short_name", "city", "country", "ror_id"],
+      "properties": {
+        "name": { "type": "string", "const": "The University of Hong Kong" },
+        "short_name": { "type": "string", "const": "HKU" },
+        "city": { "type": "string", "const": "Hong Kong" },
+        "country": { "type": "string", "const": "China" },
+        "ror_id": { "type": "string", "const": "https://ror.org/02zhqgq86" }
+      }
+    },
+    "units": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "type", "name", "aliases", "parent_id"],
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "type": {
+            "type": "string",
+            "enum": ["faculty", "department", "division", "lab", "centre", "hospital", "institute", "school", "programme"]
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1
+          },
+          "aliases": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "parent_id": {
+            "type": ["string", "null"]
+          }
+        }
+      }
+    }
+  }
+}
