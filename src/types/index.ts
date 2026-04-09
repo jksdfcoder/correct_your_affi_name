@@ -70,7 +70,7 @@ export interface TemplateConfig {
   includeLab: boolean;
   includeHospital: boolean;
   separator: ',' | '.';
-  hkSuffix: 'Hong Kong' | 'Hong Kong, China' | 'Hong Kong SAR, China';
+  hkSuffix: 'Pok Fu Lam, Hong Kong SAR, China' | 'Hong Kong, China' | 'Hong Kong SAR, China';
   coFirstSymbol: string;
   correspondingSymbol: string;
   coFirstFootnote: string;

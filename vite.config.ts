@@ -9,5 +9,7 @@ export default defineConfig({
       '@': path.resolve(process.cwd(), 'src'),
     },
   },
-  base: process.env.VITE_BASE_PATH || '/',
+  // Use relative asset URLs so `dist/index.html` works when opened as file://
+  // and when hosted under a subpath (e.g. GitHub Project Pages). Override with VITE_BASE_PATH if needed.
+  base: process.env.VITE_BASE_PATH || './',
 })

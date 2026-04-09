@@ -66,9 +66,9 @@ describe('HKU Dictionary', () => {
   });
 
   it('buildInstitutionFromUnit hkSuffix flows into country', () => {
-    const inst1 = buildInstitutionFromUnit(dict, 'fac-medicine', 'Hong Kong');
+    const inst1 = buildInstitutionFromUnit(dict, 'fac-medicine', 'Pok Fu Lam, Hong Kong SAR, China');
     const inst2 = buildInstitutionFromUnit(dict, 'fac-medicine', 'Hong Kong SAR, China');
-    expect(inst1.components.country).toBe('Hong Kong');
+    expect(inst1.components.country).toBe('Pok Fu Lam, Hong Kong SAR, China');
     expect(inst2.components.country).toBe('Hong Kong SAR, China');
   });
 

@@ -56,7 +56,7 @@ export function renderAffiliationText(
   parts.push(c.university);
 
   // Hong Kong: do not emit city then hkSuffix — that duplicates "Hong Kong" (e.g. "…, Hong Kong, Hong Kong SAR, China").
-  // The configured hkSuffix is the full location tail ("Hong Kong", "Hong Kong, China", or "Hong Kong SAR, China").
+  // The configured hkSuffix is the full location tail (e.g. "Pok Fu Lam, Hong Kong SAR, China", "Hong Kong, China").
   if (c.city === 'Hong Kong') {
     parts.push(config.hkSuffix);
   } else {

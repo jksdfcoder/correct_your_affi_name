@@ -32,6 +32,8 @@ npm run build     # production build → dist/
 npm test          # run unit tests
 ```
 
+Keyboard, screen reader, and manual smoke checks: see [docs/ACCESSIBILITY.md](docs/ACCESSIBILITY.md).
+
 ## Deployment
 
 ### GitHub Pages

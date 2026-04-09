@@ -64,7 +64,19 @@ export function renderToLatex(
   _config: TemplateConfig
 ): string {
   if (output.authors.length === 0) {
-    return "";
+    if (output.affiliations.length === 0) {
+      return "";
+    }
+    const lines: string[] = [
+      "% Affiliations only — add \\author[...]{...} lines as needed",
+      "\\usepackage{authblk}",
+      "",
+    ];
+    for (const { number, displayText } of output.affiliations) {
+      const escapedText = escapeLatex(displayText);
+      lines.push(`\\affil[${number}]{${escapedText}}`);
+    }
+    return lines.join("\n");
   }
 
   const lines: string[] = [];

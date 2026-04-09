@@ -59,14 +59,15 @@ export function renderToHtml(
   output: NumberedOutput,
   config: TemplateConfig
 ): string {
-  if (output.authors.length === 0) {
-    return '<p></p>';
-  }
-
-  const authorLine = `<p>${renderAuthorLine(output.authors, config)}</p>`;
   const affiliationList = renderAffiliationList(output.affiliations, config);
   const footnoteList = renderFootnotes(output.footnotes);
 
+  if (output.authors.length === 0) {
+    if (!affiliationList) return '<p></p>';
+    return affiliationList + (footnoteList ? `\n${footnoteList}` : '');
+  }
+
+  const authorLine = `<p>${renderAuthorLine(output.authors, config)}</p>`;
   const parts = [authorLine];
   if (affiliationList) parts.push(affiliationList);
   if (footnoteList) parts.push(footnoteList);
@@ -124,14 +125,17 @@ export function renderToPlainText(
   output: NumberedOutput,
   _config: TemplateConfig
 ): string {
-  if (output.authors.length === 0) {
-    return '';
-  }
-
-  const authorLine = renderAuthorLinePlainText(output.authors);
   const affiliationList = renderAffiliationListPlainText(output.affiliations);
   const footnoteList = renderFootnotesPlainText(output.footnotes);
 
+  if (output.authors.length === 0) {
+    if (!affiliationList) return '';
+    const parts = [affiliationList];
+    if (footnoteList) parts.push(footnoteList);
+    return parts.join('\n\n');
+  }
+
+  const authorLine = renderAuthorLinePlainText(output.authors);
   const parts = [authorLine];
   if (affiliationList) parts.push(affiliationList);
   if (footnoteList) parts.push(footnoteList);

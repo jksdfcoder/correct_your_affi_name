@@ -8,6 +8,7 @@ describe('author-store', () => {
     useAuthorStore.setState({
       authors: [],
       institutions: new Map(),
+      institutionOrder: [],
       templateConfig: {
         preset: 'nature',
         superscriptStyle: 'numeric',
@@ -194,7 +195,9 @@ describe('author-store', () => {
 
       const state = useAuthorStore.getState();
       expect(state.authors[0].affiliationIds).not.toContain('hku:fac-medicine');
-      expect(state.institutions.has('hku:fac-medicine')).toBe(false);
+      // Pool model: institution remains until removeInstitution
+      expect(state.institutions.has('hku:fac-medicine')).toBe(true);
+      expect(state.institutionOrder).toContain('hku:fac-medicine');
     });
 
     it('keeps shared institution when removing from one author', () => {
@@ -272,13 +275,76 @@ describe('author-store', () => {
       expect(output.footnotes.length).toBeGreaterThan(0);
     });
 
-    it('returns empty output when no authors', () => {
+    it('returns empty output when no authors and empty pool', () => {
       const store = useAuthorStore.getState();
       const output = store.getNumberedOutput();
 
       expect(output.authors).toEqual([]);
       expect(output.affiliations).toEqual([]);
       expect(output.footnotes).toEqual([]);
+    });
+
+    it('returns numbered affiliations only when pool has items but no authors', () => {
+      const store = useAuthorStore.getState();
+      const institution: Institution = {
+        id: 'hku:fac-medicine',
+        source: 'hku',
+        components: {
+          faculty: 'Faculty of Medicine',
+          university: 'The University of Hong Kong',
+          city: 'Hong Kong',
+          country: 'Hong Kong',
+        },
+      };
+      store.addInstitution(institution);
+      const output = store.getNumberedOutput();
+      expect(output.authors).toHaveLength(0);
+      expect(output.affiliations).toHaveLength(1);
+      expect(output.affiliations[0].number).toBe('1');
+    });
+  });
+
+  describe('addInstitution / assignAffiliation / removeInstitution', () => {
+    it('addInstitution appends to order', () => {
+      const store = useAuthorStore.getState();
+      const inst: Institution = {
+        id: 'i1',
+        source: 'custom',
+        components: { university: 'U', city: 'C', country: 'K' },
+      };
+      store.addInstitution(inst);
+      expect(useAuthorStore.getState().institutionOrder).toEqual(['i1']);
+      expect(useAuthorStore.getState().institutions.get('i1')).toEqual(inst);
+    });
+
+    it('assignAffiliation links existing pool item', () => {
+      const store = useAuthorStore.getState();
+      const author = store.addAuthor('A');
+      const inst: Institution = {
+        id: 'i1',
+        source: 'custom',
+        components: { university: 'U', city: 'C', country: 'K' },
+      };
+      store.addInstitution(inst);
+      store.assignAffiliation(author.id, 'i1');
+      expect(useAuthorStore.getState().authors[0].affiliationIds).toContain('i1');
+    });
+
+    it('removeInstitution clears pool and author links', () => {
+      const store = useAuthorStore.getState();
+      const author = store.addAuthor('A');
+      const inst: Institution = {
+        id: 'i1',
+        source: 'custom',
+        components: { university: 'U', city: 'C', country: 'K' },
+      };
+      store.addInstitution(inst);
+      store.assignAffiliation(author.id, 'i1');
+      store.removeInstitution('i1');
+      const state = useAuthorStore.getState();
+      expect(state.institutions.has('i1')).toBe(false);
+      expect(state.institutionOrder).not.toContain('i1');
+      expect(state.authors[0].affiliationIds).toEqual([]);
     });
   });
 });

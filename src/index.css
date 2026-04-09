@@ -2,28 +2,31 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Organic / Natural — HSL tokens (aligned with design system palette) */
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
-    --primary: 221.2 83.2% 53.3%;
-    --primary-foreground: 210 40% 98%;
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 221.2 83.2% 53.3%;
-    --radius: 0.5rem;
+    --background: 48 40% 98%;
+    --foreground: 60 6% 15%;
+    --card: 48 33% 99%;
+    --card-foreground: 60 6% 15%;
+    --popover: 48 33% 99%;
+    --popover-foreground: 60 6% 15%;
+    --primary: 94 15% 38%;
+    --primary-foreground: 80 12% 95%;
+    --secondary: 28 45% 56%;
+    --secondary-foreground: 0 0% 100%;
+    --muted: 35 25% 93%;
+    --muted-foreground: 60 4% 45%;
+    --accent: 35 30% 90%;
+    --accent-foreground: 60 4% 28%;
+    --destructive: 8 40% 48%;
+    --destructive-foreground: 48 40% 98%;
+    --success: 94 20% 36%;
+    --success-foreground: 0 0% 100%;
+    --border: 35 16% 85%;
+    --input: 35 16% 85%;
+    --ring: 94 15% 38%;
+    --radius: 1rem;
   }
 }
 
@@ -33,6 +36,29 @@
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground font-sans antialiased;
+    position: relative;
+  }
+
+  #root {
+    position: relative;
+    z-index: 1;
+  }
+
+  body::after {
+    content: '';
+    pointer-events: none;
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    opacity: 0.04;
+    mix-blend-mode: multiply;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+}
+
+@layer utilities {
+  .text-gradient-brand {
+    @apply bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent;
   }
 }

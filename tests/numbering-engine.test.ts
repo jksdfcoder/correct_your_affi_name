@@ -230,12 +230,16 @@ describe('Numbering Engine', () => {
     it('HK suffix: same institution renders differently with different hkSuffix', () => {
       const inst = createInstitution('inst1');
 
-      const text1 = renderAffiliationText(inst, { ...defaultConfig, hkSuffix: 'Hong Kong' });
+      const text1 = renderAffiliationText(inst, {
+        ...defaultConfig,
+        hkSuffix: 'Pok Fu Lam, Hong Kong SAR, China',
+      });
       const text2 = renderAffiliationText(inst, { ...defaultConfig, hkSuffix: 'Hong Kong SAR, China' });
 
-      expect(text1).toContain('Hong Kong');
-      expect(text1).not.toContain('SAR');
+      expect(text1).toContain('Pok Fu Lam');
+      expect(text1).toContain('Hong Kong SAR, China');
       expect(text2).toContain('Hong Kong SAR, China');
+      expect(text2).not.toContain('Pok Fu Lam');
     });
 
     it('Hong Kong city does not duplicate before hkSuffix', () => {

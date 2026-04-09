@@ -5,6 +5,8 @@ import { computeNumbering } from '@/lib/numbering-engine';
 interface AuthorStoreState {
   authors: Author[];
   institutions: Map<string, Institution>;
+  /** User-defined order for the affiliation pool (numbering follows this for referenced items). */
+  institutionOrder: string[];
   templateConfig: TemplateConfig;
 }
 
@@ -13,7 +15,15 @@ interface AuthorStoreActions {
   removeAuthor: (id: string) => void;
   updateAuthor: (id: string, updates: Partial<Author>) => void;
   reorderAuthors: (fromIndex: number, toIndex: number) => void;
+  /** Add institution to pool only (no author link). */
+  addInstitution: (institution: Institution) => void;
+  /** Remove from pool, order, and all authors. */
+  removeInstitution: (institutionId: string) => void;
+  reorderInstitutions: (fromIndex: number, toIndex: number) => void;
+  /** Link existing pool institution to author. */
+  assignAffiliation: (authorId: string, institutionId: string) => void;
   addAffiliation: (authorId: string, institution: Institution) => void;
+  /** Unlink from author only; institution stays in pool. */
   removeAffiliation: (authorId: string, institutionId: string) => void;
   setTemplateConfig: (config: Partial<TemplateConfig>) => void;
   getNumberedOutput: () => NumberedOutput;
@@ -36,9 +46,6 @@ const defaultTemplateConfig: TemplateConfig = {
   coFirstFootnote: 'These authors contributed equally to this work.',
 };
 
-/**
- * Generate a unique ID for authors
- */
 function generateId(): string {
   return `author-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
 }
@@ -46,6 +53,7 @@ function generateId(): string {
 export const useAuthorStore = create<AuthorStore>((set, get) => ({
   authors: [],
   institutions: new Map(),
+  institutionOrder: [],
   templateConfig: defaultTemplateConfig,
 
   addAuthor: (name: string): Author => {
@@ -73,33 +81,13 @@ export const useAuthorStore = create<AuthorStore>((set, get) => ({
         .filter(a => a.id !== id)
         .map((a, index) => ({ ...a, order: index }));
 
-      // Find institutions that are no longer referenced
-      const usedInstitutionIds = new Set<string>();
-      for (const author of newAuthors) {
-        for (const instId of author.affiliationIds) {
-          usedInstitutionIds.add(instId);
-        }
-      }
-
-      const newInstitutions = new Map(state.institutions);
-      for (const instId of state.institutions.keys()) {
-        if (!usedInstitutionIds.has(instId)) {
-          newInstitutions.delete(instId);
-        }
-      }
-
-      return {
-        authors: newAuthors,
-        institutions: newInstitutions,
-      };
+      return { authors: newAuthors };
     });
   },
 
   updateAuthor: (id: string, updates: Partial<Author>): void => {
     set(state => ({
-      authors: state.authors.map(a =>
-        a.id === id ? { ...a, ...updates } : a
-      ),
+      authors: state.authors.map(a => (a.id === id ? { ...a, ...updates } : a)),
     }));
   },
 
@@ -109,62 +97,87 @@ export const useAuthorStore = create<AuthorStore>((set, get) => ({
       const [movedAuthor] = authors.splice(fromIndex, 1);
       authors.splice(toIndex, 0, movedAuthor);
 
-      // Update order field for all authors
       const reorderedAuthors = authors.map((a, index) => ({ ...a, order: index }));
 
       return { authors: reorderedAuthors };
     });
   },
 
-  addAffiliation: (authorId: string, institution: Institution): void => {
+  addInstitution: (institution: Institution): void => {
     set(state => {
       const newInstitutions = new Map(state.institutions);
+      let newOrder = [...state.institutionOrder];
+
       if (!newInstitutions.has(institution.id)) {
         newInstitutions.set(institution.id, institution);
+        if (!newOrder.includes(institution.id)) {
+          newOrder.push(institution.id);
+        }
+      } else if (!newOrder.includes(institution.id)) {
+        newOrder.push(institution.id);
       }
 
-      const newAuthors = state.authors.map(a => {
-        if (a.id === authorId && !a.affiliationIds.includes(institution.id)) {
-          return {
-            ...a,
-            affiliationIds: [...a.affiliationIds, institution.id],
-          };
-        }
-        return a;
-      });
+      return { institutions: newInstitutions, institutionOrder: newOrder };
+    });
+  },
+
+  removeInstitution: (institutionId: string): void => {
+    set(state => {
+      const newInstitutions = new Map(state.institutions);
+      newInstitutions.delete(institutionId);
+      const newOrder = state.institutionOrder.filter(id => id !== institutionId);
+      const newAuthors = state.authors.map(a => ({
+        ...a,
+        affiliationIds: a.affiliationIds.filter(id => id !== institutionId),
+      }));
 
       return {
-        authors: newAuthors,
         institutions: newInstitutions,
+        institutionOrder: newOrder,
+        authors: newAuthors,
       };
     });
   },
 
-  removeAffiliation: (authorId: string, institutionId: string): void => {
+  reorderInstitutions: (fromIndex: number, toIndex: number): void => {
     set(state => {
-      const newAuthors = state.authors.map(a => {
-        if (a.id === authorId) {
-          return {
-            ...a,
-            affiliationIds: a.affiliationIds.filter(id => id !== institutionId),
-          };
-        }
-        return a;
-      });
-
-      // Check if any author still uses this institution
-      const isStillUsed = newAuthors.some(a => a.affiliationIds.includes(institutionId));
-
-      const newInstitutions = new Map(state.institutions);
-      if (!isStillUsed) {
-        newInstitutions.delete(institutionId);
-      }
-
-      return {
-        authors: newAuthors,
-        institutions: newInstitutions,
-      };
+      const order = [...state.institutionOrder];
+      const [moved] = order.splice(fromIndex, 1);
+      order.splice(toIndex, 0, moved);
+      return { institutionOrder: order };
     });
+  },
+
+  assignAffiliation: (authorId: string, institutionId: string): void => {
+    set(state => {
+      if (!state.institutions.has(institutionId)) return state;
+      const newAuthors = state.authors.map(a => {
+        if (a.id !== authorId) return a;
+        if (a.affiliationIds.includes(institutionId)) return a;
+        return {
+          ...a,
+          affiliationIds: [...a.affiliationIds, institutionId],
+        };
+      });
+      return { authors: newAuthors };
+    });
+  },
+
+  addAffiliation: (authorId: string, institution: Institution): void => {
+    get().addInstitution(institution);
+    get().assignAffiliation(authorId, institution.id);
+  },
+
+  removeAffiliation: (authorId: string, institutionId: string): void => {
+    set(state => ({
+      authors: state.authors.map(a => {
+        if (a.id !== authorId) return a;
+        return {
+          ...a,
+          affiliationIds: a.affiliationIds.filter(id => id !== institutionId),
+        };
+      }),
+    }));
   },
 
   setTemplateConfig: (config: Partial<TemplateConfig>): void => {
@@ -175,6 +188,11 @@ export const useAuthorStore = create<AuthorStore>((set, get) => ({
 
   getNumberedOutput: (): NumberedOutput => {
     const state = get();
-    return computeNumbering(state.authors, state.institutions, state.templateConfig);
+    return computeNumbering(
+      state.authors,
+      state.institutions,
+      state.templateConfig,
+      state.institutionOrder
+    );
   },
 }));
