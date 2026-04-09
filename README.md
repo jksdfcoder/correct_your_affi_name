@@ -38,7 +38,13 @@ Keyboard, screen reader, and manual smoke checks: see [docs/ACCESSIBILITY.md](do
 
 ### GitHub Pages
 
-Push to `main` — GitHub Actions will automatically build and deploy to GitHub Pages.
+1. In the repo on GitHub: **Settings → Pages → Build and deployment**.
+2. Under **Source**, choose **GitHub Actions** (not “Deploy from a branch”).
+3. Push to `main` (or run **Actions → Deploy to GitHub Pages → Run workflow**). The workflow `.github/workflows/deploy-pages.yml` builds with `npm run build` and publishes `dist/`.
+
+Your site URL will be `https://<user>.github.io/correct_your_affi_name/`. This app uses `base: './'` in Vite so assets load correctly under that project path.
+
+**Note:** If the repository is **private**, the Pages site can still be **public** (GitHub shows a warning). Use a public repo if you want the code and site visibility aligned.
 
 ### Docker (Internal)
 
