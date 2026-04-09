@@ -4,7 +4,9 @@ import {
   renderAffiliationText,
   getNextSuperscript,
 } from '@/lib/numbering-engine';
-import type { Author, Institution, TemplateConfig } from '@/types';
+import { buildInstitutionFromUnit } from '@/lib/hku-dictionary';
+import type { Author, Institution, TemplateConfig, HkuDictionary } from '@/types';
+import dictionaryData from '@/data/hku-dictionary.json';
 
 // Default template config for testing
 const defaultConfig: TemplateConfig = {
@@ -253,6 +255,47 @@ describe('Numbering Engine', () => {
       );
       // Regression: avoid city + hkSuffix becoming ", Hong Kong, Hong Kong SAR, China"
       expect(text).not.toContain(', Hong Kong, Hong Kong,');
+    });
+
+    it('omits empty city/country (DIY custom line) — no trailing commas', () => {
+      const inst: Institution = {
+        id: 'custom:x',
+        source: 'custom',
+        components: {
+          university: 'My Lab Name',
+          city: '',
+          country: '',
+        },
+      };
+      const text = renderAffiliationText(inst, defaultConfig);
+      expect(text).toBe('My Lab Name');
+      expect(text).not.toMatch(/,\s*,/);
+    });
+
+    it('HKU-tab-style DIY: Hong Kong + hkSuffix matches dictionary tail', () => {
+      const inst: Institution = {
+        id: 'custom:x',
+        source: 'custom',
+        components: {
+          university: 'AAAAAA',
+          city: 'Hong Kong',
+          country: '',
+        },
+      };
+      const text = renderAffiliationText(inst, defaultConfig);
+      expect(text).toBe(`AAAAAA, ${defaultConfig.hkSuffix}`);
+    });
+
+    it('HKU dictionary: department before institute-typed parent faculty (e.g. Surgery, LKS)', () => {
+      const dict = dictionaryData as HkuDictionary;
+      const inst = buildInstitutionFromUnit(dict, 'dept-surgery', defaultConfig.hkSuffix);
+      const text = renderAffiliationText(inst, defaultConfig);
+      const iDept = text.indexOf('Department of Surgery');
+      const iLks = text.indexOf('Li Ka Shing Faculty of Medicine');
+      expect(iDept).toBeGreaterThan(-1);
+      expect(iLks).toBeGreaterThan(-1);
+      expect(iDept).toBeLessThan(iLks);
+      expect(text).toContain('The University of Hong Kong');
     });
   });
 });

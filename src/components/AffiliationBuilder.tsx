@@ -1,4 +1,4 @@
-import { useState, useMemo, useId, useEffect, useRef, type Ref } from 'react';
+import { useState, useMemo, useEffect, useRef, type Ref } from 'react';
 import { useHkuDictionary } from '@/hooks/useHkuDictionary';
 import { useRorSearch } from '@/hooks/useRorSearch';
 import { useAuthorStore } from '@/stores/author-store';
@@ -50,7 +50,6 @@ export function AffiliationBuilder({
   const [customCity, setCustomCity] = useState('');
   const [customCountry, setCustomCountry] = useState('');
   const [reportDialogOpen, setReportDialogOpen] = useState(false);
-  const builderInstructionsId = useId();
   const hkuListRef = useRef<HTMLDivElement>(null);
   const externalListRef = useRef<HTMLDivElement>(null);
 
@@ -121,7 +120,8 @@ export function AffiliationBuilder({
       source: 'custom',
       components: {
         university: t,
-        city: '',
+        // HKU tab DIY: use same geographic tail as dictionary rows (hkSuffix); avoids empty ", ," in preview.
+        city: 'Hong Kong',
         country: '',
       },
     };
@@ -214,7 +214,6 @@ export function AffiliationBuilder({
                   onValueChange={handleHkuInputChange}
                   onKeyDown={handleHkuKeyDown}
                   className="rounded-none border-0 border-b border-border/60"
-                  aria-describedby={builderInstructionsId}
                 />
                 <CommandList
                   ref={hkuListRef}
@@ -346,7 +345,7 @@ export function AffiliationBuilder({
           <TabsContent
             value="external"
             tabIndex={-1}
-            className="m-0 mt-0 hidden min-h-0 flex-col gap-3 data-[state=active]:flex"
+            className="m-0 mt-0 hidden min-h-0 flex-col gap-3 overflow-hidden data-[state=active]:flex"
           >
             <div className="relative max-w-2xl">
               <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
@@ -367,8 +366,9 @@ export function AffiliationBuilder({
             <div
               ref={externalListRef}
               className={cn(
-                'h-[clamp(180px,40dvh,320px)] min-h-0 flex-1 rounded-[1.25rem] border border-border/60',
-                externalListScrollable ? 'overflow-y-auto' : 'overflow-y-hidden'
+                /* No flex-1 here: with a fixed h-clamp, flex-1 grows to fit content and kills internal scroll. */
+                'h-[clamp(180px,40dvh,320px)] min-h-0 shrink-0 rounded-[1.25rem] border border-border/60',
+                externalListScrollable ? 'overflow-y-auto overscroll-y-contain' : 'overflow-y-hidden'
               )}
             >
               {rorLoading ? (
@@ -467,17 +467,6 @@ export function AffiliationBuilder({
           </TabsContent>
         </Tabs>
       </div>
-
-      <p
-        id={builderInstructionsId}
-        className="shrink-0 border-t border-border/80 bg-card/90 px-4 py-2.5 text-xs leading-relaxed text-muted-foreground sm:px-5"
-      >
-        
-        Search HKU, ROR, or DIY — entries go to the list on the left. Use the author row{' '}
-        <strong className="font-semibold text-foreground">Link affiliation</strong> menu or drag to assign.
-        Keyboard: Tab between fields; in HKU search use arrow keys and Enter;{' '}
-        <span className="whitespace-nowrap">Shift+?</span> opens shortcut help.
-      </p>
     </section>
   );
 }

@@ -172,6 +172,7 @@ export function SettingsPanel({
                 </SelectItem>
                 <SelectItem value="Hong Kong, China">Hong Kong, China</SelectItem>
                 <SelectItem value="Hong Kong SAR, China">Hong Kong SAR, China</SelectItem>
+                <SelectItem value="Hong Kong">Hong Kong</SelectItem>
               </SelectContent>
             </Select>
           </Section>

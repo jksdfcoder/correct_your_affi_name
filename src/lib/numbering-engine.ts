@@ -43,33 +43,46 @@ export function renderAffiliationText(
 ): string {
   const parts: string[] = [];
   const c = institution.components;
+  const sep = config.separator + ' ';
 
-  // Order: division/lab/hospital/centre/institute → department → faculty → university → city → country
-  if (c.division) parts.push(c.division);
-  if (config.includeLab && c.lab) parts.push(c.lab);
-  if (config.includeHospital && c.hospital) parts.push(c.hospital);
-  if (c.centre) parts.push(c.centre);
-  if (c.institute) parts.push(c.institute);
-  if (c.school) parts.push(c.school);
-  if (config.includeDepartment && c.department) parts.push(c.department);
-  if (config.includeFaculty && c.faculty) parts.push(c.faculty);
-  parts.push(c.university);
+  const pushTrim = (s: string | undefined) => {
+    const t = s?.trim();
+    if (t) parts.push(t);
+  };
+
+  // Order: division → lab/hospital → department → faculty → centre/institute/school → university → location.
+  // Department before faculty; centre/institute/school after, so HKU dictionary rows typed as "institute"
+  // (e.g. Li Ka Shing Faculty of Medicine) still render after the department (e.g. Department of Surgery).
+  if (c.division) pushTrim(c.division);
+  if (config.includeLab && c.lab) pushTrim(c.lab);
+  if (config.includeHospital && c.hospital) pushTrim(c.hospital);
+  if (config.includeDepartment && c.department) pushTrim(c.department);
+  if (config.includeFaculty && c.faculty) pushTrim(c.faculty);
+  if (c.centre) pushTrim(c.centre);
+  if (c.institute) pushTrim(c.institute);
+  if (c.school) pushTrim(c.school);
+  pushTrim(c.university);
 
   // Hong Kong: do not emit city then hkSuffix — that duplicates "Hong Kong" (e.g. "…, Hong Kong, Hong Kong SAR, China").
   // The configured hkSuffix is the full location tail (e.g. "Pok Fu Lam, Hong Kong SAR, China", "Hong Kong, China").
-  if (c.city === 'Hong Kong') {
-    parts.push(config.hkSuffix);
+  if (c.city?.trim() === 'Hong Kong') {
+    pushTrim(config.hkSuffix);
   } else {
-    parts.push(c.city);
-    parts.push(c.country);
+    pushTrim(c.city);
+    pushTrim(c.country);
   }
 
-  if (config.includeZipcode && c.zipcode) {
-    // Insert zipcode before country
-    parts.splice(parts.length - 1, 0, c.zipcode);
+  if (config.includeZipcode && c.zipcode?.trim()) {
+    const z = c.zipcode.trim();
+    // Before last segment when there is a location tail; otherwise append (e.g. DIY with university only).
+    if (parts.length >= 2) {
+      parts.splice(parts.length - 1, 0, z);
+    } else {
+      parts.push(z);
+    }
   }
 
-  return parts.join(config.separator + ' ');
+  return parts.join(sep);
 }
 
 /**

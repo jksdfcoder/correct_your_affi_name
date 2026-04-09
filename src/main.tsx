@@ -88,6 +88,6 @@ if (import.meta.env.DEV) {
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <App />
-    <Toaster richColors position="bottom-center" closeButton />
+    <Toaster richColors position="top-right" closeButton duration={2000} />
   </StrictMode>,
 )
