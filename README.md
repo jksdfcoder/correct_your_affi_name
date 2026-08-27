@@ -42,17 +42,7 @@ Keyboard, screen reader, and manual smoke checks: see [docs/ACCESSIBILITY.md](do
 2. Under **Source**, choose **GitHub Actions** (not “Deploy from a branch”).
 3. Push to `main` (or run **Actions → Deploy to GitHub Pages → Run workflow**). The workflow `.github/workflows/deploy-pages.yml` builds with `npm run build` and publishes `dist/`.
 
-Your site URL will be `https://<user>.github.io/correct_your_affi_name/`. This app uses `base: './'` in Vite so assets load correctly under that project path.
-
-**Note:** If the repository is **private**, the Pages site can still be **public** (GitHub shows a warning). Use a public repo if you want the code and site visibility aligned.
-
-### Docker (Internal)
-
-```bash
-docker build -t correct-your-affi-name .
-docker run -p 8080:80 correct-your-affi-name
-# → http://localhost:8080
-```
+Live site: [https://jksdfcoder.github.io/correct_your_affi_name/](https://jksdfcoder.github.io/correct_your_affi_name/). This app uses `base: './'` in Vite so assets load under that project path.
 
 ## Project Structure
 
